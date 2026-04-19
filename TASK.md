@@ -1,9 +1,9 @@
 TECHNICAL CONTRACT · UI ONLY EDITION
 CCA Prep
 Complete Technical Specification — Pure Frontend, No Backend
-Document 3 of 3  ·  Version 2.0  ·  April 2026  ·  localStorage Only
+Document 3 of 3  ·  Version 2.1  ·  April 2026  ·  localStorage Only
 
-This document is the authoritative source of truth for building CCA Prep v2.0. It covers every file, every component, every prop, every localStorage key, and every formula. No backend, no Supabase, no auth. Pass this document directly to Claude Code, Cursor, or any AI coding agent to build the complete app.
+This document is the authoritative source of truth for building CCA Prep v2.1. It covers every file, every component, every prop, every localStorage key, and every formula. No backend, no Supabase, no auth. Pass this document directly to Claude Code, Cursor, or any AI coding agent to build the complete app.
 1. Critical Constraints — Read First
 These are non-negotiable. Any code that violates these constraints is incorrect.
 •	NO Supabase. NO Firebase. NO fetch() calls to any backend. Zero network requests after the initial page load.
@@ -15,7 +15,7 @@ These are non-negotiable. Any code that violates these constraints is incorrect.
 •	All page components use default exports. No named exports from page files.
 2. File Structure — Complete
 Every file listed must be created. No additional files should be invented.
-cca-prep/
+cca-prep/                          # 9-week plan: 3 prerequisite + 6 CCA core weeks
 ├── index.html                     # PWA entry + apple-mobile-web-app meta tags
 ├── vite.config.js                 # Vite + VitePWA + @tailwindcss/vite
 ├── package.json
@@ -28,7 +28,7 @@ cca-prep/
     ├── App.jsx                    # BrowserRouter + Routes + Guard component
     ├── lib/
     │   ├── storage.js             # All localStorage read/write helpers
-    │   ├── data.js                # WEEKS[], QUIZ_QUESTIONS[], DOMAINS[]
+    │   ├── data.js                # WEEKS[9], QUIZ_QUESTIONS[22], DOMAINS[7] (D0,DA,D1–D5)
     │   └── useProgress.js         # useProgress() hook
     ├── components/
     │   ├── Layout.jsx             # Sidebar (lg+) + TopBar + BottomNav (<lg)
@@ -43,6 +43,87 @@ cca-prep/
         ├── QuizResults.jsx        # /quiz/results
         ├── Progress.jsx           # /progress
         └── Settings.jsx           # /settings
+2b. Data Shapes — data.js
+// DOMAINS array (7 entries)
+{ id: 'D0'|'DA'|'D1'|'D2'|'D3'|'D4'|'D5', label: string, weight: number, color: string }
+// D0 and DA have weight: 0 (prerequisite stages, not exam-weighted)
+
+// WEEKS array (9 entries)
+{
+  id: number,          // 1–9
+  phase: number,       // 0 = prerequisite, 1+ = CCA core
+  phaseLabel: string,  // e.g. 'Prerequisites', 'Core'
+  title: string,
+  dates: string,       // e.g. 'Week 1'
+  domain: string,      // display label for the stage
+  color: string,       // hex
+  build: string,       // what you build this week
+  tasks: Task[],
+  materials: Material[],
+  concepts: Concept[]
+}
+
+// Task shape
+{ id: string, day: number, date: string, label: string, type: 'read'|'build'|'test'|'review'|'rest', domain: string, text: string }
+// type drives icon display in WeekDetail: read=📄 build=⚒️ test=🧪 review=🔁 rest=😴
+
+// Material shape
+{ type: string, icon: string, title: string, url: string, desc: string, paid?: true }
+// paid: true marks optional Udemy/paid courses — shown with a badge in WeekDetail
+
+// Paid (Udemy) courses by week — all optional supplements:
+// Week 1 — AI Fluency & How Claude Works
+//   • Claude AI: The AI Assistant You'll Actually Use
+//     https://www.udemy.com/course/claude-ai-the-ai-assistant-youll-actually-use/
+//     ⭐4.5 · 2,602 ratings · 8hrs. Practical Claude usage for real-world tasks.
+//   • Claude for Beginners: AI in Business & Automation
+//     https://www.udemy.com/course/claude-pro-mastery-ai-for-business-marketing-automation/
+//     ⭐4.3 · 191 ratings · 16hrs. Business and marketing use cases.
+// Week 2 — Claude as a Power User
+//   • Claude - Master Claude Cowork, Claude Code, Skills & Plugins
+//     https://www.udemy.com/course/claude-code-cowork-course/
+//     ⭐4.7 · 160 ratings · 15.5hrs. Deep dive on Cowork and Claude Code UI.
+//   • Mastering Claude Cowork & AI Agents in 5 hours
+//     https://www.udemy.com/course/mastering-claude-cowork-ai-agents/
+//     ⭐4.7 · 176 ratings · 5hrs. Zero coding required.
+// Week 3 — API Basics, RAG & MCP Intro
+//   • Claude Code - The Practical Guide (Academind)
+//     https://www.udemy.com/course/claude-code-the-practical-guide/
+//     ⭐4.6 · 5,935 ratings · 3hrs. Best-rated practical Claude Code course.
+//   • The Complete Claude Code & Claude Cowork Masterclass
+//     https://www.udemy.com/course/claude-aiagents-cowork-masterclass/
+//     ⭐4.6 · 865 ratings · 15hrs. Comprehensive developer + agent content.
+// Week 9 — 3 Full Mock Exams → Exam Day
+//   • Anthropic CCA - 3 Full Practice Exams (Frank Kane)
+//     https://www.udemy.com/course/anthropic-claude-certified-architect-3-full-practice-exams/
+//     ⭐4.3 · 180 scenario-based questions with detailed explanations.
+//   • Claude Certified Architect Exams - 6 Practice Tests
+//     https://www.udemy.com/course/claude-certified-architect-practice-tests/
+//     ⭐4.6 Bestseller · 360 questions. Best-rated CCA practice test pack.
+//   • NEW CCAF Exams 2026 — 300 Questions
+//     https://www.udemy.com/course/new-claude-certified-architect-foundations-cca-f-exams/
+//     ⭐4.2 · 300 questions. Updated 2026 content.
+
+// Concept shape (3 types with different structures)
+// type 'rule':    { type:'rule',    title: string, body: string }
+// type 'tip':     { type:'tip',     title: string, body: string }
+// type 'compare': { type:'compare', title: string, bad: {label:string, text:string}, good: {label:string, text:string} }
+
+// QuizResult shape (stored in cca_quiz_history_v2 and sessionStorage)
+{
+  type: 'mock'|'topic',
+  domain: string|null,       // null for mock, e.g. 'D1' for topic
+  score: number,
+  total: number,
+  pct: number,
+  domainScores: { [domainId]: { correct: number, total: number } },
+  answers: { questionId: string, selected: number, correct: boolean }[],
+  takenAt: number            // Date.now()
+}
+
+// QUIZ_QUESTIONS array (22 entries)
+{ id: string, domain: 'D1'|'D2'|'D3'|'D4'|'D5', question: string, options: string[], answer: number, explanation: string }
+// Note: quiz questions only cover exam domains D1–D5 (not D0/DA prerequisite stages)
 3. Routing
 // App.jsx — exact route structure
 // Guard: if !isSetupComplete() → Navigate to /onboarding
@@ -180,10 +261,10 @@ export function useProgress() {
 
   const stats = useMemo(() => ({
     done,          // number of completed tasks across all weeks
-    total,         // always 42 (sum of all tasks)
+    total,         // always 84 (sum of all tasks across 9 weeks)
     pct,           // Math.round(done/total*100)
     weekProgress,  // [{weekId, done, total, pct}] — one per week
-    domainProgress, // {D1..D5: {done, total, pct}}
+    domainProgress, // {D0,DA,D1..D5: {done, total, pct}} — all 7 domains
     weeksComplete, // count of weeks where pct === 100
     streak,        // computeStreak() result
   }), [completions])
@@ -201,9 +282,9 @@ QuizActive	pages/QuizActive.jsx	none	Reads config from sessionStorage on mount
 QuizResults	pages/QuizResults.jsx	none	Reads result from sessionStorage on mount
 9. Progress Calculation Formulas
 Metric	Formula	Notes
-Overall pct	Math.round(done/42*100)	42 = total task count (constant)
+Overall pct	Math.round(done/84*100)	84 = total task count (constant, 9 weeks)
 Week pct	Math.round(wDone/w.tasks.length*100)	Per week
-Domain pct	Math.round(dDone/dTotal*100)	Per domain D1–D5
+Domain pct	Math.round(dDone/dTotal*100)	Per domain D0, DA, D1–D5 (7 domains total)
 Ring circumference	2 * Math.PI * radius	Where radius = (size - stroke*2) / 2
 Ring offset	circumference - (pct/100) * circumference	strokeDashoffset value
 Days to exam	Math.max(0, Math.ceil((new Date(examDate) - new Date()) / 86400000))	0 floor — no negative
@@ -285,6 +366,7 @@ Very muted	text-stone-600	#4b5563	Week dates, sub-sub-text
 •	Complete flow → lands on Home → greeting shows entered name
 •	Reload → stays on Home (no re-onboarding)
 14.3 Study Plan
+•	9 weeks total: Weeks 1–3 are prerequisite stages (AI Fluency, Power User, API/RAG); Weeks 4–9 are CCA core exam domains
 •	Check task → checkbox fills green, text strikethrough, progress bar updates instantly
 •	Uncheck → reverts immediately
 •	All tasks in week → green completion banner appears
@@ -317,4 +399,24 @@ Very muted	text-stone-600	#4b5563	Week dates, sub-sub-text
 •	Android Chrome: install prompt → installs → standalone
 •	Offline: disconnect network → all screens load and function
 
-CCA Prep · Technical Contract v2.0 · UI Only Edition · April 2026
+15. Deployment
+•	GitHub repo: https://github.com/yessaravanan/cca-prep-test
+•	Vercel project: cca-prep (already linked — push to main auto-deploys)
+•	Vercel projectId: prj_0iDNMaOyN0bQhYsQR0PjJgBqv0wA
+•	Build command: vite build (auto-detected by Vercel)
+•	Output directory: dist
+•	No environment variables required — zero backend
+
+CCA Prep · Technical Contract v2.1 · UI Only Edition · April 2026
+
+Changelog v2.1:
+•	9 weeks total (was implied 6) — Weeks 1–3 are prerequisite stages
+•	Total tasks updated to 84 (was 42)
+•	Domains expanded to 7: D0 (AI Fluency), DA (API & RAG Basics), D1–D5
+•	WEEKS[] shape includes phase (number) and phaseLabel (string) fields
+•	Materials array items may include paid: true flag for optional paid courses
+•	QUIZ_QUESTIONS array contains 22 questions
+•	Concept shape documented (3 types: rule, tip, compare)
+•	QuizResult shape documented
+•	Task type enum documented (read, build, test, review, rest)
+•	Deployment section added (GitHub + Vercel)
